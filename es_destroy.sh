@@ -1,8 +1,12 @@
 #!/bin/bash
 #
-# Destroy elasticseach cluster
+# Destroy elasticsearch cluster
 #
 
 NODES=$(docker ps -a -q --filter "name=es")
-docker stop ${NODES}
-docker rm ${NODES}
+
+if [ "${NODES}" ]; then
+  echo "Stopping and removing elasticsearch nodes..."
+  docker kill ${NODES}
+  docker rm ${NODES}
+fi

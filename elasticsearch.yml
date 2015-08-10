@@ -1,0 +1,5 @@
+# this is the template for all nodes
+
+cluster.name: ${CLUSTER}
+node.name: ${NODE}
+bootstrap.mlockall: true
