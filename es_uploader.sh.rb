@@ -12,6 +12,12 @@ def format_number(number)
   number.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\1,').reverse
 end
 
+# print current line (reprint after error for example)
+#
+def print_current_progress(row_count)
+  print '.' * ((row_count % (options[:batch] * options[:report])) / options[:report])
+end
+
 # specific mapping defined to provide a field for the contentname
 # that allows matching against the entire field and not just terms
 #
@@ -87,6 +93,7 @@ time = Benchmark.realtime do
       }
 
       if row_count % options[:batch] == 0
+        tries = 3
         client.bulk refresh: false, body: doc_array
         doc_count += doc_array.count
         doc_array = []
@@ -95,8 +102,14 @@ time = Benchmark.realtime do
       end
     rescue CSV::MalformedCSVError => e
       puts "\nERROR parsing #{format_number(row_count)} : #{e.message} : #{line}"
+      print_current_progress(row_count)
+    rescue Net::ReadTimeout, Errno::EHOSTUNREACH, Errno::ETIMEDOUT, Errno::ECONNRESET => e
+      retry unless (tries-= 1).zero?
+      puts "\nERROR processing #{format_number(row_count)} : #{e.class} : #{e.message}"
+      print_current_progress(row_count)
     rescue => e
-      puts "\nERROR uploading #{format_number(row_count)} : #{e.message} : #{doc_array.map {|a| a[:index][:_id]}}"
+      puts "\nERROR processing #{format_number(row_count)} : #{e.class} : #{e.message}"
+      print_current_progress(row_count)
     end
   end
 
@@ -107,5 +120,7 @@ time = Benchmark.realtime do
   end
 end
 
-puts "\n\nFinished uploading #{format_number(doc_count)} of #{format_number(row_count)} records into Elasticsearch"
+# actual documents read has to be adjusted for skip factor
+read_count = row_count - options[:skip]
+puts "\n\nFinished uploading #{format_number(doc_count)} of #{format_number(read_count)} records into Elasticsearch"
 puts " -> elapsed time = #{time.to_i} seconds at a rate of #{(doc_count / time).to_i} documents per second\n\n"
