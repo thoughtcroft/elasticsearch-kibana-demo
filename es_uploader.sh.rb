@@ -6,38 +6,6 @@ require 'elasticsearch'
 require 'optparse'
 require 'pry'
 
-# we subclass file reading so we can fix quoting
-# before CSV tries to parse the next line
-#
-class MyFile < File
-  SEP = /(?:,|\Z)/
-  QUOTED = /"([^"]*)"/
-  UNQUOTED = /([^,]*)/
-  FIELD = /(?:#{QUOTED}|#{UNQUOTED})#{SEP}/
-
-  # this will split our quoted line into properly quoted
-  # fields that can be reassembled for delivery to caller
-  def parse_quoted(line)
-    line.scan(FIELD)[0...-1].map{ |matches| matches[0] || matches[1] }
-  end
-
-  # just interested in lines with quotes but not multiple lines
-  # since they will be parsed again individually
-  def has_quotes?(line)
-    !!((/['"]/ =~ line) && !(/[\r\n].+/ =~ line))
-  end
-
-  def gets(*args)
-    if line = super
-      line.encode! 'UTF-8', 'binary', invalid: :replace, undef: :replace, replace: ''
-      binding.pry
-      line = parse_quoted(line).join(',') if has_quotes?(line)
-      binding.pry
-    end
-    line
-  end
-end
-
 # comma separate integers so that 99999 => 99,999
 #
 def format_number(number)
@@ -90,40 +58,44 @@ client = Elasticsearch::Client.new host: "#{options[:host]}:#{options[:port]}"
 puts "-> Updating index mapping"
 client.indices.put_mapping index: 'aris', type: 'content_read', body: content_read_mapping
 
-row_count = 0
+row_count = -1
 doc_count = 0
 doc_array = []
+headers = nil
 
 time = Benchmark.realtime do
 
-  csv = CSV.new(MyFile.open(options[:file]), headers: true, converters: :all)
+  File.foreach(options[:file]) do |line|
+    begin
+      # first line is a header row so process and skip to next
+      headers ||= CSV.parse_line(line)
+      row_count += 1
+      next unless row_count > 0
 
-  puts "-> Skipping #{format_number(options[:skip])} rows" if options[:skip] > 0
+      puts "-> Skipping #{format_number(options[:skip])} rows" if options[:skip] > 0
+      next unless row_count > options[:skip]
 
-  while row = csv.gets
-    next unless (row_count += 1) > options[:skip]
-    row_hash = row.to_hash
-    doc_array << {
-      index: {
-        _index: 'aris',
-        _type: 'content_read',
-        _id: row_hash['UniqueId'],
-        data: row_hash
+      row = CSV.parse_line(line, headers: headers, converters: :all)
+      doc_array << {
+        index: {
+          _index: 'aris',
+          _type: 'content_read',
+          _id: row['UniqueId'],
+          data: row.to_hash
+        }
       }
-    }
 
-    if row_count % options[:batch] == 0
-      begin
+      if row_count % options[:batch] == 0
         client.bulk refresh: false, body: doc_array
         doc_count += doc_array.count
-      rescue => e
-        puts "\nERROR uploading #{format_number(row_count)}:#{e.message}\n#{doc_array}\n"
-        next
-      ensure
         doc_array = []
         print '.'
         puts " =  #{format_number(row_count)}" if row_count % (options[:batch] * options[:report])  == 0
       end
+    rescue CSV::MalformedCSVError => e
+      puts "\nERROR parsing #{format_number(row_count)} : #{e.message} : #{line}"
+    rescue => e
+      puts "\nERROR uploading #{format_number(row_count)} : #{e.message} : #{doc_array}"
     end
   end
 
