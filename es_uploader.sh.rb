@@ -35,16 +35,17 @@ end
 
 # The Magic Starts Here!
 
-options = { host: 'dockerhost', port: '9201', skip: 0, batch: 100, report: 100 }
+options = { host: 'dockerhost', port: '9201', skip: 0, batch: 100, report: 100, timeout: 5*60 }
 
 OptionParser.new do |opts|
   opts.banner = "Usage: #{__FILE__} [options]"
   opts.separator ""
-  opts.on('-h', '--host HOST',  "Elasticsearch HOST (#{options[:host]})") { |h| options[:host] = h }
-  opts.on('-p', '--port PORT',  "Elasticsearch PORT (#{options[:port]})") { |p| options[:port] = p }
-  opts.on('-f', '--file FILE',  "FILE of csv documents to upload") { |f| options[:file] = f }
-  opts.on('-s', '--skip NUM',   "Skip the first NUM records (#{options[:skip]})") { |s| options[:skip] = s.to_i }
-  opts.on('-b', '--batch NUM',  "Upload documents in batches of NUM (#{options[:batch]})") { |b| options[:batch] = b.to_i }
+  opts.on('-h', '--host HOST', "Elasticsearch HOST (#{options[:host]})") { |h| options[:host] = h }
+  opts.on('-p', '--port PORT', "Elasticsearch PORT (#{options[:port]})") { |p| options[:port] = p }
+  opts.on('-t', '--timeout SECS', "Set SECS for timeout period for Elasticsearch connection (#{options[:timeout]})") { |t| options[:timeout] = t.to_i }
+  opts.on('-f', '--file FILE', "FILE of csv documents to upload") { |f| options[:file] = f }
+  opts.on('-s', '--skip NUM', "Skip the first NUM records (#{options[:skip]})") { |s| options[:skip] = s.to_i }
+  opts.on('-b', '--batch NUM', "Upload documents in batches of NUM (#{options[:batch]})") { |b| options[:batch] = b.to_i }
   opts.on('-r', '--report NUM', "Report upload count every NUM batches (#{options[:report]})") { |r| options[:report] = r.to_i }
 end.parse!
 
@@ -53,10 +54,12 @@ raise "You must supply a file name!" unless options[:file]
 puts "\nStarting upload into Elasticsearch using #{options}"
 
 puts "-> Connecting to Elasticsearch"
-client = Elasticsearch::Client.new host: "#{options[:host]}:#{options[:port]}"
+client = Elasticsearch::Client.new host: "#{options[:host]}:#{options[:port]}", timeout: options[:timeout]
 
 puts "-> Updating index mapping"
 client.indices.put_mapping index: 'aris', type: 'content_read', body: content_read_mapping
+
+puts "-> Skipping #{format_number(options[:skip])} rows" if options[:skip] > 0
 
 row_count = -1
 doc_count = 0
@@ -72,9 +75,7 @@ time = Benchmark.realtime do
       row_count += 1
       next unless row_count > 0
 
-      puts "-> Skipping #{format_number(options[:skip])} rows" if options[:skip] > 0
       next unless row_count > options[:skip]
-
       row = CSV.parse_line(line, headers: headers, converters: :all)
       doc_array << {
         index: {
@@ -95,7 +96,7 @@ time = Benchmark.realtime do
     rescue CSV::MalformedCSVError => e
       puts "\nERROR parsing #{format_number(row_count)} : #{e.message} : #{line}"
     rescue => e
-      puts "\nERROR uploading #{format_number(row_count)} : #{e.message} : #{doc_array}"
+      puts "\nERROR uploading #{format_number(row_count)} : #{e.message} : #{doc_array.map {|a| a[:index][:_id]}}"
     end
   end
 
