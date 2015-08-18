@@ -4,7 +4,7 @@ require 'csv'
 require 'benchmark'
 require 'elasticsearch'
 require 'optparse'
-require 'pry'
+#require 'pry'
 
 # comma separate integers so that 99999 => 99,999
 #
@@ -17,6 +17,13 @@ end
 def print_current_progress(row_count)
   print '.' * ((row_count % (options[:batch] * options[:report])) / options[:report])
 end
+
+# for fixing headers that have unprintable characters at the start
+#
+def printable_array(array)
+  array.map { |e| e.scan(/[[:print]]/).join }
+end
+
 
 # specific mapping defined to provide a field for the contentname
 # that allows matching against the entire field and not just terms
@@ -77,7 +84,7 @@ time = Benchmark.realtime do
   File.foreach(options[:file]) do |line|
     begin
       # first line is a header row so process and skip to next
-      headers ||= CSV.parse_line(line)
+      headers ||= printable_array(CSV.parse_line(line))
       row_count += 1
       next unless row_count > 0
 
