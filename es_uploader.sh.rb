@@ -83,14 +83,15 @@ raise "You must supply a file name!" unless options[:file]
 puts "\nStarting upload into Elasticsearch using:"
 puts JSON.pretty_generate options
 
-puts "-> Connecting to Elasticsearch"
+puts "\n-> Connecting to Elasticsearch"
 client = Elasticsearch::Client.new host: "#{options[:host]}:#{options[:port]}", timeout: options[:timeout]
+puts JSON.pretty_generate client.cluster.health
 
-puts "-> Updating index mapping"
-client.indices.put_mapping index: 'aris', type: 'content_read', body: content_read_mapping
+puts "\n-> Updating index mapping"
+client.indices.put_mapping(index: 'aris', type: 'content_read', body: content_read_mapping)
 
-puts "-> Skipping #{format_number(options[:skip])} rows" if options[:skip] > 0
 puts "-> Limit upload to #{format_number(options[:limit])} rows" if options[:limit] > 0
+puts "-> Skipping #{format_number(options[:skip])} rows" if options[:skip] > 0
 
 row_count = -1
 doc_count = 0
@@ -136,11 +137,11 @@ time = Benchmark.realtime do
       print_current_progress(row_count, options)
     rescue Net::ReadTimeout, Errno::EHOSTUNREACH, Errno::ETIMEDOUT, Errno::ECONNRESET => e
       retry unless (tries-= 1).zero?
-      puts "\nERROR processing #{format_number(row_count)} : #{e.class} : #{e.message}"
-      print_current_progress(row_count, options)
+      puts "\nERROR processing #{format_number(row_count)}"
+      raise
     rescue => e
-      puts "\nERROR processing #{format_number(row_count)} : #{e.class} : #{e.message}"
-      print_current_progress(row_count, options)
+      puts "\nERROR processing #{format_number(row_count)}"
+      raise
     end
   end
 
