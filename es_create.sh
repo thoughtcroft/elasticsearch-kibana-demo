@@ -14,7 +14,7 @@ END=$(($START + $NODES - 1))
 
 PREFIX="es"
 CONT_DIR="/usr/share/elasticsearch"
-HOST_DIR="${HOME}/elasticsearch"
+HOST_DIR="${PWD}"
 PLUGINS="${HOST_DIR}/plugins"
 CONFIG_FILES="elasticsearch.yml logging.yml"
 CLUSTER="wazza-is-awesome"
