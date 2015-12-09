@@ -3,3 +3,15 @@
 cluster.name: ${CLUSTER}
 node.name: ${NODE}
 bootstrap.mlockall: true
+network.host: 0.0.0.0
+
+# required for kibana?
+http.cors.allow-origin: "/.*/"
+http.cors.enabled: true
+
+# note: this has security implications but is necessary to use inline scripts
+# within aggregations and queries. If public access enabled then we must
+# proxy to ensure that only GET is permitted and only port 9200 is exposed
+# this is not supported in 2.x # script.disable_dynamic: false
+script.inline: true
+script.indexed: true

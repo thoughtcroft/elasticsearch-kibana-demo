@@ -18,7 +18,7 @@ Latest Builds: https://github.com/royrusso/elasticsearch-HQ
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
 <head>
-    <title></title>
+    <title>Elastic HQ</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     
@@ -199,7 +199,7 @@ Latest Builds: https://github.com/royrusso/elasticsearch-HQ
             <br/>
             <small>&copy;Razorback, LLC. All Rights Reserved.</small>
             <br/>
-            <small>We are not affiliated with ElasticSearch, Inc.</small>
+            <small>We are not affiliated with Elastic, Inc.</small>
         </p>
     </div>
 </footer>
@@ -214,6 +214,9 @@ Latest Builds: https://github.com/royrusso/elasticsearch-HQ
 <script src="js/lib/jquery/jquery.metadata.min.js"></script>
 <script src="js/lib/jquery/jquery.tablesorter.pager.min.js"></script>
 
+<!-- ES -->
+<script src="js/lib/elasticsearch/elasticsearch.jquery.min.js"></script>
+
 <!-- Twitter Bootstrap -->
 <script src="js/lib/bootstrap/bootstrap.min.js"></script>
 <script src="js/lib/bootstrap-select/bootstrap-select.min.js"></script>
@@ -226,8 +229,14 @@ Latest Builds: https://github.com/royrusso/elasticsearch-HQ
 <script src="js/lib/backbone-validation/backbone-validation-min.js"></script>
 <script src="js/lib/backbone-validation/backbone.validation.bootstrap.min.js"></script>
 
+<!-- Lodash -->
+<script src="js/lib/lodash/lodash.min.js"></script>
+<script>
+    var lodash = _.noConflict();
+</script>
+
 <!-- Notify -->
-<script src="js/lib/pnotify/jquery.pnotify.min.js"></script>
+<script src="js/lib/pnotify/pnotify.min.js"></script>
 
 <!-- Numeral -->
 <script src="js/lib/numeraljs/min/numeral.min.js"></script>
@@ -274,8 +283,8 @@ Latest Builds: https://github.com/royrusso/elasticsearch-HQ
         $("[rel=tipRight]").tooltip();
         $("[rel=popRight]").popover(
                 {
-                    'trigger':'hover',
-                    'animation':true
+                    'trigger': 'hover',
+                    'animation': true
                 }
         );
     });
