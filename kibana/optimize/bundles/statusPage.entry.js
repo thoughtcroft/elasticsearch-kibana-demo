@@ -15,6 +15,7 @@
  *  - spyModes@1.0.0
  *  - statusPage@1.0.0
  *  - table_vis@1.0.0
+ *  - timelion@0.1.190
  *
  */
 

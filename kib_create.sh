@@ -12,6 +12,10 @@ ELASTICSEARCH_URL="http://${DOCKER_IP}:9201"
 
 echo "Creating new kibana node..."
 
+for FOLDER in "config optimize installedPlugins"; do
+  mkdir -p ${HOST_DIR}/${FOLDER}
+done
+
 rm -f ${HOST_DIR}/config/${CONFIG_FILE}
 while read line; do
   eval echo "$line" >> ${HOST_DIR}/config/${CONFIG_FILE}
