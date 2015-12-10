@@ -62,7 +62,8 @@ options = {
   skip: 0,
   limit: 0,
   batch: 100,
-  report: 100
+  report: 100,
+  index: 'zunos'
 }
 
 OptionParser.new do |opts|
@@ -72,6 +73,7 @@ OptionParser.new do |opts|
   opts.on('-p', '--port PORT', "Elasticsearch PORT (#{options[:port]})") { |p| options[:port] = p }
   opts.on('-t', '--timeout SECS', "Set SECS for timeout period for Elasticsearch connection (#{options[:timeout]})") { |t| options[:timeout] = t.to_i }
   opts.on('-f', '--file FILE', "FILE of csv documents to upload") { |f| options[:file] = f }
+  opts.on('-i', '--index INDEX', "Elasticsearch INDEX (#{options[:index]})") { |i| options[:index] = i }
   opts.on('-s', '--skip NUM', "Skip the first NUM records (#{options[:skip]})") { |s| options[:skip] = s.to_i }
   opts.on('-l', '--limit NUM', "Limit processing to NUM records (#{options[:limit]})") { |l| options[:limit] = l.to_i }
   opts.on('-b', '--batch NUM', "Upload documents in batches of NUM (#{options[:batch]})") { |b| options[:batch] = b.to_i }
@@ -88,7 +90,7 @@ client = Elasticsearch::Client.new host: "#{options[:host]}:#{options[:port]}", 
 puts JSON.pretty_generate client.cluster.health
 
 puts "\n-> Updating index mapping"
-client.indices.put_mapping(index: 'aris', type: 'content_read', body: content_read_mapping)
+client.indices.put_mapping(index: options[:index], type: 'content_read', body: content_read_mapping)
 
 puts "-> Limit upload to #{format_number(options[:limit])} rows" if options[:limit] > 0
 puts "-> Skipping #{format_number(options[:skip])} rows" if options[:skip] > 0
@@ -117,7 +119,7 @@ time = Benchmark.realtime do
 
       doc_array << {
         index: {
-          _index: 'aris',
+          _index: options[:index],
           _type: 'content_read',
           _id: row['UniqueId'],
           data: row.to_hash
