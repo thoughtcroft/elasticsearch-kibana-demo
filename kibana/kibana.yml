@@ -1,6 +1,6 @@
 # config for kibana
 
-port: ${PORT}
+port: ${CONT_PORT}
 host: 0.0.0.0
 elasticsearch_url: ${ELASTICSEARCH_URL}
 
