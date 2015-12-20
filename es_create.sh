@@ -38,8 +38,7 @@ for NUM in $(printf "%02d " $(seq ${START} ${END})); do
     -e "NODE=${NODE}" \
     -v ${DATA}:${CONT_DIR}/data \
     -v ${CONFIG}:${CONT_DIR}/config \
-    -v ${PLUGINS}:${CONT_DIR}/plugins \
-    elasticsearch \
+    es_plugins \
     /bin/bash -c 'usermod -u 1000 elasticsearch; gosu elasticsearch elasticsearch'
 done
 
