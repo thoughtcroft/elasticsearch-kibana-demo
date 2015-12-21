@@ -14,4 +14,7 @@ RUN cd /usr/share/elasticsearch/bin && \
   ./plugin install royrusso/elasticsearch-HQ
 
 # ensure ownership is correct
+RUN usermod -u 1000 elasticsearch && \
+    groupmod -g 5000 staff && \
+    groupmod -g 50 elasticsearch
 RUN chown -R elasticsearch:elasticsearch /usr/share/elasticsearch

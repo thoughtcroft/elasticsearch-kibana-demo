@@ -38,8 +38,7 @@ for NUM in $(printf "%02d " $(seq ${START} ${END})); do
     -e "NODE=${NODE}" \
     -v ${DATA}:${CONT_DIR}/data \
     -v ${CONFIG}:${CONT_DIR}/config \
-    es_plugins \
-    /bin/bash -c 'usermod -u 1000 elasticsearch; gosu elasticsearch elasticsearch'
+    es_plugins
 done
 
 echo "Access the cluster at 'http://dockerhost:9201'"
