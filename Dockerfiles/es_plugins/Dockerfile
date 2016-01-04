@@ -1,8 +1,7 @@
-FROM elasticsearch
+FROM elasticsearch:2.1.0
 MAINTAINER Warren Bain (warren@zunos.com)
 
 # install the various plugins
-ENV ES_VERSION 2.1.0
 RUN cd /usr/share/elasticsearch/bin && \
   ./plugin install license && \
   ./plugin install marvel-agent && \
@@ -15,6 +14,9 @@ RUN cd /usr/share/elasticsearch/bin && \
 
 # ensure ownership is correct
 RUN usermod -u 1000 elasticsearch && \
-    groupmod -g 5000 staff && \
-    groupmod -g 50 elasticsearch
-RUN chown -R elasticsearch:elasticsearch /usr/share/elasticsearch
+  groupmod -g 5000 staff && \
+  groupmod -g 50 elasticsearch
+RUN cd /usr/share/elasticsearch && \
+  for FOLDER in logs plugins; do \
+    chown -R elasticsearch:elasticsearch $FOLDER; \
+  done

@@ -15,3 +15,7 @@ http.cors.enabled: true
 # this is not supported in 2.x # script.disable_dynamic: false
 script.inline: true
 script.indexed: true
+
+# added to stop Courier failure based on stackoverflow article
+# http://stackoverflow.com/questions/30053967/courier-fetch-shards-failed
+threadpool.search.queue_size: 10000

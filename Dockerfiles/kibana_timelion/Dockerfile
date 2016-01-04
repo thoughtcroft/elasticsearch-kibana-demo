@@ -1,7 +1,6 @@
-FROM kibana
+FROM kibana:4.3.1
 MAINTAINER Warren Bain (warren@zunos.com)
 
 # install the Timelion plugin
-ENV TIMELION_VERSION latest
-RUN /opt/kibana/bin/kibana plugin --install kibana/timelion/$TIMELION_VERSION
+RUN /opt/kibana/bin/kibana plugin --install kibana/timelion
 RUN chown -R kibana:kibana /opt/kibana
