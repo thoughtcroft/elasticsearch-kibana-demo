@@ -42,7 +42,16 @@ def content_read_mapping
         ContentName: {
           type: 'string',
           fields: {
-            untouched: {
+            raw: {
+              type: 'string',
+              index: 'not_analyzed'
+            }
+          }
+        },
+        OrganisationName: {
+          type: 'string',
+          fields: {
+            raw: {
               type: 'string',
               index: 'not_analyzed'
             }
@@ -116,6 +125,8 @@ time = Benchmark.realtime do
       # analyse fields and fix dates to be Elasticsearch friendly
       row = CSV.parse_line(line, headers: headers, converters: :all)
       %w(ViewDateUtc CreateDateUtc).each { |f| row[f] = format_date(row[f]) }
+      row['GroupList']  = row['GroupList'].split(';')
+      row['@timestamp'] = row['ViewDateUtc']
 
       doc_array << {
         index: {
