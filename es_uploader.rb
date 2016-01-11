@@ -42,19 +42,13 @@ def content_read_mapping
         ContentName: {
           type: 'string',
           fields: {
-            raw: {
-              type: 'string',
-              index: 'not_analyzed'
-            }
+            raw: { type: 'string', index: 'not_analyzed' }
           }
         },
         OrganisationName: {
           type: 'string',
           fields: {
-            raw: {
-              type: 'string',
-              index: 'not_analyzed'
-            }
+            raw: { type: 'string', index: 'not_analyzed' }
           }
         }
       }

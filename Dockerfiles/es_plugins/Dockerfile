@@ -1,4 +1,4 @@
-FROM elasticsearch:2.1.0
+FROM elasticsearch:2.1.1
 MAINTAINER Warren Bain (warren@zunos.com)
 
 # install the various plugins
