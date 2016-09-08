@@ -1,5 +1,5 @@
 FROM elasticsearch:2.1.1
-MAINTAINER Warren Bain (warren@zunos.com)
+MAINTAINER Warren Bain (warren@thoughtcroft.com)
 
 # install the various plugins
 RUN cd /usr/share/elasticsearch/bin && \

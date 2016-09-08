@@ -1,5 +1,5 @@
 FROM kibana:4.3.1
-MAINTAINER Warren Bain (warren@zunos.com)
+MAINTAINER Warren Bain (warren@thoughtcroft.com)
 
 # install the Timelion plugin
 RUN /opt/kibana/bin/kibana plugin --install kibana/timelion

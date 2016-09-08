@@ -66,7 +66,7 @@ options = {
   limit: 0,
   batch: 100,
   report: 100,
-  index: 'zunos'
+  index: 'wazza'
 }
 
 OptionParser.new do |opts|
